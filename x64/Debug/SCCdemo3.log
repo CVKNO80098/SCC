@@ -1,0 +1,9 @@
+﻿  SCCdemo3.cpp
+C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(22,71): warning C4267: “参数”: 从“size_t”转换到“_Ty”，可能丢失数据
+          with
+          [
+              _Ty=int
+          ]
+C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(125,62): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(142,45): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+  SCCdemo3.vcxproj -> C:\Users\qc275\Desktop\SCC\x64\Debug\SCCdemo3.exe

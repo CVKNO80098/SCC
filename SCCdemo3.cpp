@@ -38,7 +38,7 @@ size_t hashPassword(const wstring& password) {
 
     // 将哈希值缩短到 [0, 100] 范围内的整数
     int scaledValue = hashValue % 101;  // 取余数，范围是 [0, 100]
-    wcout << scaledValue << endl;
+    //wcout << scaledValue << endl;
     return scaledValue;
 }
 //日常字符串用hash，缩短到10以内
@@ -48,7 +48,7 @@ size_t hashPasschar(const wchar_t* passChar) {
 
     //缩短到 [0, 10] 范围内的整数
     int scaledValue = hashValue % 11;
-    wcout << L"调用生成十以内的hash：" << scaledValue << endl;
+    //wcout << L"调用生成十以内的hash：" << scaledValue << endl;
     return scaledValue;
 }
 //初步加密
@@ -68,7 +68,7 @@ wstring convertToHex(const wchar_t* wideString) {
         }
     }
 
-    wcout << ss.str() << endl;
+    //wcout << ss.str() << endl;
     return feedback.str();
 }
 //第一步解密：去掉头
@@ -125,7 +125,7 @@ wstring goToLocktwo(const wchar_t* wideString, const wchar_t* passWord) {
             mergedString += generateRandomString(hashPasschar(&passWord[i % str2Length]));// 将passWord的第(i % str2Length)个字符添加到mergedString中。
         } 
     }
-    wcout << L"加密函数结果检验：" << mergedString << endl; // 输出加密函数结果检验信息和mergedString的值。
+    //wcout << L"加密函数结果检验：" << mergedString << endl; // 输出加密函数结果检验信息和mergedString的值。
     return mergedString; // 返回mergedString作为函数的结果。
 }
 //加密程序EFI
@@ -141,12 +141,12 @@ int LockSub() {
     wstring head;
     head = generateRandomString(hashPassword(passWordsub));
 
-    wcout << L"head:" << head << endl;//调试调试调试调试调试调试调试调试调试调试调试调试调试
+    //wcout << L"head:" << head << endl;//调试调试调试调试调试调试调试调试调试调试调试调试调试
 
     wstring result = convertToHex(userInput.c_str());
 
     result = goToLocktwo(result.c_str(), passWordsub.c_str());
-    wcout << L"二次混淆的结果是：" << result << endl;
+    /*wcout << L"二次混淆的结果是：" << result << endl;*/
 
     wstringstream rtn;
     rtn << head << result;

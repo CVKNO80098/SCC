@@ -1,13 +1,22 @@
-﻿#include <iostream>
+﻿#define NOMINMAX // 禁用 windows.h 中的 max 和 min 宏
+#include <windows.h>
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <iomanip>
 #include <cstdlib>
+#include <locale>
 #include <codecvt>
 #include <random>
 
 using namespace std;
 
+
+//转化String为Wstring
+wstring stringToWstring(const string& str) {
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    return converter.from_bytes(str);
+}
 //截取字符串的
 std::wstring wsubstr(const wchar_t* str, int i, int j) {
     std::wstring sub;
@@ -38,7 +47,6 @@ size_t hashPassword(const wstring& password) {
 
     // 将哈希值缩短到 [0, 100] 范围内的整数
     int scaledValue = hashValue % 101;  // 取余数，范围是 [0, 100]
-    //wcout << scaledValue << endl;
     return scaledValue;
 }
 //日常字符串用hash，缩短到10以内
@@ -48,9 +56,23 @@ size_t hashPasschar(const wchar_t* passChar) {
 
     //缩短到 [0, 10] 范围内的整数
     int scaledValue = hashValue % 11;
-    //wcout << L"调用生成十以内的hash：" << scaledValue << endl;
     return scaledValue;
 }
+//去掉逗号
+std::wstring removeComma(const std::wstring& str) {
+    std::wstringstream result;
+    size_t pos = str.find(L",");
+    size_t start = 0;
+    while (pos != std::wstring::npos) {
+        result << str.substr(start, pos - start);
+        start = pos + 1;
+        pos = str.find(L",", start);
+    }
+    result << str.substr(start);
+    return result.str();
+}
+
+
 //初步加密
 wstring convertToHex(const wchar_t* wideString) {
     wstringstream ss;
@@ -59,7 +81,7 @@ wstring convertToHex(const wchar_t* wideString) {
     for (int i = 0; wideString[i] != L'\0'; i++) {
         ss << wideString[i] << L":";
         if (iswalpha(wideString[i]) || iswdigit(wideString[i])) {
-            ss << L"0x" << setw(4) << setfill(L'0') << hex << (int)wideString[i] << endl;
+            ss << L"0x" << setw(4) << setfill(L'0') << hex << (int)wideString[i] << L"\n";
             feedback << setw(4) << setfill(L'0') << hex << (int)wideString[i];
         }
         else {
@@ -67,9 +89,7 @@ wstring convertToHex(const wchar_t* wideString) {
             feedback << setw(4) << setfill(L'0') << hex << (int)wideString[i];
         }
     }
-
-    //wcout << ss.str() << endl;
-    return feedback.str();
+    return removeComma(feedback.str());
 }
 //第一步解密：去掉头
 wstring deleteHead(const wchar_t* wideString, const wstring& password) {
@@ -113,8 +133,8 @@ wstring convertFromHex(const wchar_t* wideString) {
 //二次加密,函数加密，把输出转为A+b
 wstring goToLocktwo(const wchar_t* wideString, const wchar_t* passWord) {
     wstring mergedString;
-    size_t str1Length = wcslen(wideString); 
-    size_t str2Length = wcslen(passWord); 
+    size_t str1Length = wcslen(wideString);
+    size_t str2Length = wcslen(passWord);
 
     size_t maxLength = str1Length; // 将 str1Length 的值保存在 maxLength 变量中。
 
@@ -123,7 +143,7 @@ wstring goToLocktwo(const wchar_t* wideString, const wchar_t* passWord) {
         if (str2Length > 0) // 检查str2Length是否大于0。
         {
             mergedString += generateRandomString(hashPasschar(&passWord[i % str2Length]));// 将passWord的第(i % str2Length)个字符添加到mergedString中。
-        } 
+        }
     }
     //wcout << L"加密函数结果检验：" << mergedString << endl; // 输出加密函数结果检验信息和mergedString的值。
     return mergedString; // 返回mergedString作为函数的结果。
@@ -146,7 +166,7 @@ int LockSub() {
     wstring result = convertToHex(userInput.c_str());
 
     result = goToLocktwo(result.c_str(), passWordsub.c_str());
-    /*wcout << L"二次混淆的结果是：" << result << endl;*/
+    //wcout << L"二次混淆的结果是：" << result << endl;
 
     wstringstream rtn;
     rtn << head << result;
@@ -164,34 +184,109 @@ int UnLockSub() {
     wcout << L"请输入密码（区分大小写）：";
     wcin >> passWordsub;
 
-    wstring unLock = convertFromHex(deleteOtherchar(deleteHead(userInput.c_str(), passWordsub).c_str(),passWordsub).c_str());
+    wstring unLock = convertFromHex(deleteOtherchar(deleteHead(userInput.c_str(), passWordsub).c_str(), passWordsub).c_str());
 
     wcout << L"您输入的字符是：" << unLock << endl;
     return 0;
 }
 
-
 //EFI（可以不动了）
-int main() {
+int main(int argc, char* argv[]) {
     setlocale(LC_ALL, "");
-    size_t choice1;
+    // 设置输入流（stdin）和输出流（stdout）的字符编码为 GBK
+    SetConsoleCP(936);
+    SetConsoleOutputCP(936);
 
-    wcout << L"请选择模块：\n1：加密\n2：解密\n";
-    wcin >> choice1;
-    switch (choice1)
-    {
-    case 1:LockSub(); break;
-    case 2:UnLockSub(); break;
-    default:
-        wcout << L"请输入数字，您的输入不符合规定" << endl;
-        break;
+    // 设置本地化环境为 UTF-8
+    std::locale::global(std::locale(""));
+
+    string words;
+    string password = "123";
+    int choice = 1;
+
+    if (argc == 1) {
+        size_t choice1;
+
+        wcout << L"请选择模块：\n1：加密\n2：解密\n";
+        wcin >> choice1;
+        switch (choice1)
+        {
+        case 1:LockSub(); break;
+        case 2:UnLockSub(); break;
+        default:
+            wcout << L"请输入数字，您的输入不符合规定" << endl;
+            break;
+        }
+        ;
+        wcout << L"按任意键关闭此窗口. . .";
+        getchar(); // 等待用户按下一个键
+        cin.clear(); // 清除输入缓冲区中的错误标志
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 清除输入缓冲区中的剩余字符
+        return 0;
     }
 
+    if (argc == 2) {
+        string arg = argv[1];
 
+        if (arg == "--version") {
+            cout << "SCC 版本 1.0" << endl;
+            return 0;
+        }
+        else if (arg == "--help") {
+            cout << "使用方式: SCC -L <str> -p <str> | -U <str> [--version] [--help]" << endl;
+            return 0;
+        }
+    }
 
-    wcout << L"按任意键关闭此窗口. . .";
-    getchar(); // 等待用户按下一个键
-    cin.clear(); // 清除输入缓冲区中的错误标志
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 清除输入缓冲区中的剩余字符
+    for (int i = 1; i < argc; i += 2) {
+        string option = argv[i];
+
+        if (option == "-L") {
+            words = argv[i + 1];
+            choice = 1;
+            // 调用 LockSub() 函数或编写其他操作逻辑
+
+        }
+        else if (option == "-U") {
+            words = argv[i + 1];
+            choice = 2;
+            // 调用 UnLockSub() 函数或编写其他操作逻辑
+        }
+        else if (option == "-p") {
+            password = argv[i + 1];
+        }
+        else {
+            cout << "无效的选项: " << option << endl;
+            return 1;
+        }
+    }
+    if (choice == 1)
+    {
+        wstring head;
+        head = generateRandomString(hashPassword(stringToWstring(password)));
+        wstring result = convertToHex(stringToWstring(words).c_str());
+        result = goToLocktwo(result.c_str(), stringToWstring(password).c_str());
+        wstringstream rtn;
+        rtn << head << result;
+        wcout << rtn.str() << endl << endl;//加密并输出
+        wcout << L"按任意键关闭此窗口. . .";
+        getchar(); // 等待用户按下一个键
+        cin.clear(); // 清除输入缓冲区中的错误标志
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 清除输入缓冲区中的剩余字符
+        return 0;
+    }
+    else if (choice == 2)
+    {
+        wstring unLock = convertFromHex(deleteOtherchar(deleteHead(stringToWstring(words).c_str(), stringToWstring(password)).c_str(), stringToWstring(password)).c_str());
+        wcout << L"解码字符：" << unLock << endl;
+        wcout << L"按任意键关闭此窗口. . .";
+        getchar(); // 等待用户按下一个键
+        cin.clear(); // 清除输入缓冲区中的错误标志
+        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 清除输入缓冲区中的剩余字符
+    }
+    else
+    {
+        wcout << L"你他妈的输了个啥能跑这来" << endl;
+    }
     return 0;
 }

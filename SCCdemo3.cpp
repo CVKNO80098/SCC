@@ -8,18 +8,33 @@
 #include <locale>
 #include <codecvt>
 #include <random>
+#include <fstream>
+#include <ctime>
 
 using namespace std;
 
+wstringstream rtn;
+wstring unLock;
 
+//获取当前时间
+wstring getCurrentTime() {
+    time_t currentTime;
+    time(&currentTime);
+    tm localTime;
+    localtime_s(&localTime, &currentTime);
+
+    wchar_t formattedTime[100];
+    wcsftime(formattedTime, sizeof(formattedTime) / sizeof(wchar_t), L"%Y-%m-%d %H:%M:%S", &localTime);
+    return wstring(formattedTime);
+}
 //转化String为Wstring
 wstring stringToWstring(const string& str) {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    wstring_convert<codecvt_utf8_utf16<wchar_t>> converter;
     return converter.from_bytes(str);
 }
 //截取字符串的
-std::wstring wsubstr(const wchar_t* str, int i, int j) {
-    std::wstring sub;
+wstring wsubstr(const wchar_t* str, int i, int j) {
+    wstring sub;
     sub.assign(str + i, str + i + j);
     return sub;
 }
@@ -47,6 +62,7 @@ size_t hashPassword(const wstring& password) {
 
     // 将哈希值缩短到 [0, 100] 范围内的整数
     int scaledValue = hashValue % 101;  // 取余数，范围是 [0, 100]
+    wcout << scaledValue << endl;
     return scaledValue;
 }
 //日常字符串用hash，缩短到10以内
@@ -56,14 +72,15 @@ size_t hashPasschar(const wchar_t* passChar) {
 
     //缩短到 [0, 10] 范围内的整数
     int scaledValue = hashValue % 11;
+    wcout << L"调用生成十以内的hash：" << scaledValue << endl;
     return scaledValue;
 }
 //去掉逗号
-std::wstring removeComma(const std::wstring& str) {
-    std::wstringstream result;
+wstring removeComma(const wstring& str) {
+    wstringstream result;
     size_t pos = str.find(L",");
     size_t start = 0;
-    while (pos != std::wstring::npos) {
+    while (pos != wstring::npos) {
         result << str.substr(start, pos - start);
         start = pos + 1;
         pos = str.find(L",", start);
@@ -71,8 +88,6 @@ std::wstring removeComma(const std::wstring& str) {
     result << str.substr(start);
     return result.str();
 }
-
-
 //初步加密
 wstring convertToHex(const wchar_t* wideString) {
     wstringstream ss;
@@ -89,6 +104,7 @@ wstring convertToHex(const wchar_t* wideString) {
             feedback << setw(4) << setfill(L'0') << hex << (int)wideString[i];
         }
     }
+    wcout << removeComma(ss.str()) << endl;
     return removeComma(feedback.str());
 }
 //第一步解密：去掉头
@@ -118,10 +134,10 @@ wstring convertFromHex(const wchar_t* wideString) {
     wstringstream ss; // 创建一个字符串流对象，用于存储转换后的宽字符
 
     for (int i = 0; wideString[i] != L'\0'; i += 4) { // 遍历宽字符数组中的每个字符，每次递增4，以处理一组四个字符
-        wstring hexSubstring = wstring(&wideString[i], &wideString[i + 4]); // 从宽字符数组中获取当前四个字符，存储在宽字符串 hexSubstring 中
+        wstring hexSubstring = wstring(&wideString[i], &wideString[i + 4]); // 从宽字符数组中获取当前四个字符，存储在宽 字符串 hexSubstring 中
 
         int hexValue;
-        wstringstream(hexSubstring) >> hex >> hexValue; // 将字符串转换为整数，存储在 hexValue 中，得到一个十六进制的整数值
+        wstringstream(hexSubstring) >> hex >> hexValue; // 将字符串转换为整数，存储在 hexValue 中，得到一个十六进制的整 数值
 
         wchar_t wideChar = static_cast<wchar_t>(hexValue); // 将 hexValue 转换为宽字符
         ss << wideChar; // 将宽字符追加到字符串流 ss 中
@@ -145,7 +161,7 @@ wstring goToLocktwo(const wchar_t* wideString, const wchar_t* passWord) {
             mergedString += generateRandomString(hashPasschar(&passWord[i % str2Length]));// 将passWord的第(i % str2Length)个字符添加到mergedString中。
         }
     }
-    //wcout << L"加密函数结果检验：" << mergedString << endl; // 输出加密函数结果检验信息和mergedString的值。
+    wcout << L"加密函数结果检验：" << mergedString << endl; // 输出加密函数结果检验信息和mergedString的值。
     return mergedString; // 返回mergedString作为函数的结果。
 }
 //加密程序EFI
@@ -161,12 +177,12 @@ int LockSub() {
     wstring head;
     head = generateRandomString(hashPassword(passWordsub));
 
-    //wcout << L"head:" << head << endl;//调试调试调试调试调试调试调试调试调试调试调试调试调试
+    wcout << L"head:" << head << endl;//调试调试调试调试调试调试调试调试调试调试调试调试调试
 
     wstring result = convertToHex(userInput.c_str());
 
     result = goToLocktwo(result.c_str(), passWordsub.c_str());
-    //wcout << L"二次混淆的结果是：" << result << endl;
+    wcout << L"二次混淆的结果是：" << result << endl;
 
     wstringstream rtn;
     rtn << head << result;
@@ -189,6 +205,18 @@ int UnLockSub() {
     wcout << L"您输入的字符是：" << unLock << endl;
     return 0;
 }
+//文件写入temp
+void createTempFile(const string& filePath, const wstring& content) {
+    wofstream file(filePath);
+    if (file.is_open()) {
+        file << content;
+        file.close();
+        wcout << L"文件 '" << wstring(filePath.begin(), filePath.end()) << L"' 创建成功，并成功写入字符串。" << endl;
+    }
+    else {
+        wcout << L"无法创建文件。" << endl;
+    }
+}
 
 //EFI（可以不动了）
 int main(int argc, char* argv[]) {
@@ -202,6 +230,7 @@ int main(int argc, char* argv[]) {
 
     string words;
     string password = "123";
+    string address = "NULL";
     int choice = 1;
 
     if (argc == 1) {
@@ -255,6 +284,9 @@ int main(int argc, char* argv[]) {
         else if (option == "-p") {
             password = argv[i + 1];
         }
+        else if (option == "-pr") {
+            address = argv[i + 1];
+        }
         else {
             cout << "无效的选项: " << option << endl;
             return 1;
@@ -266,27 +298,29 @@ int main(int argc, char* argv[]) {
         head = generateRandomString(hashPassword(stringToWstring(password)));
         wstring result = convertToHex(stringToWstring(words).c_str());
         result = goToLocktwo(result.c_str(), stringToWstring(password).c_str());
-        wstringstream rtn;
         rtn << head << result;
         wcout << rtn.str() << endl << endl;//加密并输出
-        wcout << L"按任意键关闭此窗口. . .";
-        getchar(); // 等待用户按下一个键
-        cin.clear(); // 清除输入缓冲区中的错误标志
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 清除输入缓冲区中的剩余字符
-        return 0;
     }
     else if (choice == 2)
     {
-        wstring unLock = convertFromHex(deleteOtherchar(deleteHead(stringToWstring(words).c_str(), stringToWstring(password)).c_str(), stringToWstring(password)).c_str());
+        unLock = convertFromHex(deleteOtherchar(deleteHead(stringToWstring(words).c_str(), stringToWstring(password)).c_str(), stringToWstring(password)).c_str());
         wcout << L"解码字符：" << unLock << endl;
-        wcout << L"按任意键关闭此窗口. . .";
-        getchar(); // 等待用户按下一个键
-        cin.clear(); // 清除输入缓冲区中的错误标志
-        cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // 清除输入缓冲区中的剩余字符
     }
     else
     {
         wcout << L"你他妈的输了个啥能跑这来" << endl;
+    }
+    if (address != "NULL")
+    {
+        wcout << L"您启用了print模块" << endl;
+        if (choice == 1)
+        {
+            createTempFile(address, rtn.str());
+        }
+        else if (choice == 2)
+        {
+            createTempFile(address, unLock);
+        }
     }
     return 0;
 }

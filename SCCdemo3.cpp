@@ -174,8 +174,6 @@ int LockSub() {
     wstring head;
     head = generateRandomString(hashPassword(passWordsub));
 
-    wcout << L"head:" << head << endl;//调试调试调试调试调试调试调试调试调试调试调试调试调试
-
     wstring result = convertToHex(userInput.c_str());
 
     result = goToLocktwo(result.c_str(), passWordsub.c_str());

@@ -15,6 +15,7 @@ using namespace std;
 
 wstringstream rtn;
 wstring unLock;
+int pr = 0;
 
 //获取当前时间
 wstring getCurrentTime() {
@@ -62,7 +63,6 @@ size_t hashPassword(const wstring& password) {
 
     // 将哈希值缩短到 [0, 100] 范围内的整数
     int scaledValue = hashValue % 101;  // 取余数，范围是 [0, 100]
-    wcout << scaledValue << endl;
     return scaledValue;
 }
 //日常字符串用hash，缩短到10以内
@@ -72,7 +72,6 @@ size_t hashPasschar(const wchar_t* passChar) {
 
     //缩短到 [0, 10] 范围内的整数
     int scaledValue = hashValue % 11;
-    wcout << L"调用生成十以内的hash：" << scaledValue << endl;
     return scaledValue;
 }
 //去掉逗号
@@ -104,7 +103,6 @@ wstring convertToHex(const wchar_t* wideString) {
             feedback << setw(4) << setfill(L'0') << hex << (int)wideString[i];
         }
     }
-    wcout << removeComma(ss.str()) << endl;
     return removeComma(feedback.str());
 }
 //第一步解密：去掉头
@@ -161,7 +159,6 @@ wstring goToLocktwo(const wchar_t* wideString, const wchar_t* passWord) {
             mergedString += generateRandomString(hashPasschar(&passWord[i % str2Length]));// 将passWord的第(i % str2Length)个字符添加到mergedString中。
         }
     }
-    wcout << L"加密函数结果检验：" << mergedString << endl; // 输出加密函数结果检验信息和mergedString的值。
     return mergedString; // 返回mergedString作为函数的结果。
 }
 //加密程序EFI
@@ -225,7 +222,7 @@ int main(int argc, char* argv[]) {
     SetConsoleCP(936);
     SetConsoleOutputCP(936);
 
-    // 设置本地化环境为 UTF-8
+    // 多了一行，但是我不敢动它
     std::locale::global(std::locale(""));
 
     string words;
@@ -236,14 +233,14 @@ int main(int argc, char* argv[]) {
     if (argc == 1) {
         size_t choice1;
 
-        wcout << L"请选择模块：\n1：加密\n2：解密\n";
+        wcout << L"现在时间：" << getCurrentTime() << L"\n请选择模块：\n1：加密\n2：解密\n";
         wcin >> choice1;
         switch (choice1)
         {
         case 1:LockSub(); break;
         case 2:UnLockSub(); break;
         default:
-            wcout << L"请输入数字，您的输入不符合规定" << endl;
+            wcout << L"请输入数字，您的输入不符合规定\n请使用--help获取帮助" << endl;
             break;
         }
         ;
@@ -258,11 +255,11 @@ int main(int argc, char* argv[]) {
         string arg = argv[1];
 
         if (arg == "--version") {
-            cout << "SCC 版本 1.0" << endl;
+            wcout << L"[" << getCurrentTime() << L"]   " << L"SCC 版本 1.2.3" << endl;
             return 0;
         }
         else if (arg == "--help") {
-            cout << "使用方式: SCC -L <str> -p <str> | -U <str> [--version] [--help]" << endl;
+            wcout << L"使用方式:\n SCC -L <str> -p <str> | -U <password> |-w <address> [--version] [--help]\n请注意，-w必须在最后，可留空" << endl;
             return 0;
         }
     }
@@ -271,21 +268,37 @@ int main(int argc, char* argv[]) {
         string option = argv[i];
 
         if (option == "-L") {
-            words = argv[i + 1];
+            if (argv[i + 1] != "-p" && argv[i + 1] != "-w")
+            {
+                words = argv[i + 1];
+            }
             choice = 1;
             // 调用 LockSub() 函数或编写其他操作逻辑
 
         }
         else if (option == "-U") {
-            words = argv[i + 1];
+            if (argv[i + 1] != "-p" && argv[i + 1] != "-w")
+            {
+                words = argv[i + 1];
+            }
             choice = 2;
             // 调用 UnLockSub() 函数或编写其他操作逻辑
         }
         else if (option == "-p") {
-            password = argv[i + 1];
+            if (argv[i + 1] != "-w")
+            {
+                password = argv[i + 1];
+            }
         }
-        else if (option == "-pr") {
-            address = argv[i + 1];
+        else if (option == "-w") {
+            pr = 1;
+            if (i + 1 < argc) {
+                address = argv[i + 1];
+            }
+            else
+            {
+                wcout << L"你将使用默认路径" << endl;
+            }
         }
         else {
             cout << "无效的选项: " << option << endl;
@@ -299,27 +312,43 @@ int main(int argc, char* argv[]) {
         wstring result = convertToHex(stringToWstring(words).c_str());
         result = goToLocktwo(result.c_str(), stringToWstring(password).c_str());
         rtn << head << result;
-        wcout << rtn.str() << endl << endl;//加密并输出
+        wcout << L"[" << getCurrentTime() << L"]   " << rtn.str() << endl << endl;//加密并输出
     }
     else if (choice == 2)
     {
         unLock = convertFromHex(deleteOtherchar(deleteHead(stringToWstring(words).c_str(), stringToWstring(password)).c_str(), stringToWstring(password)).c_str());
-        wcout << L"解码字符：" << unLock << endl;
+        wcout << L"[" << getCurrentTime() << L"]   " << L"解码字符：" << unLock << endl;
     }
     else
     {
-        wcout << L"你他妈的输了个啥能跑这来" << endl;
+        wcout << L"[" << getCurrentTime() << L"]   " << L"你他妈的输了个啥能跑这来" << endl;
     }
-    if (address != "NULL")
+    if (pr == 1)
     {
-        wcout << L"您启用了print模块" << endl;
-        if (choice == 1)
+        wcout << L"[" << getCurrentTime() << L"]   " << L"您启用了print模块" << endl;
+        if (address != "NULL")
         {
-            createTempFile(address, rtn.str());
+            wcout << L"[" << getCurrentTime() << L"]   " << L"指定路径文件为" << address.c_str() << L"，正在启动生成" << endl;
+            if (choice == 1)
+            {
+                createTempFile(address, rtn.str());
+            }
+            else if (choice == 2)
+            {
+                createTempFile(address, unLock);
+            }
         }
-        else if (choice == 2)
+        else
         {
-            createTempFile(address, unLock);
+            wcout << L"[" << getCurrentTime() << L"]   " << L"未指定路径文件，将在当前文件夹下生成temp.txt文件储存" << endl;
+            if (choice == 1)
+            {
+                createTempFile("temp.txt", rtn.str());
+            }
+            else if (choice == 2)
+            {
+                createTempFile("temp.txt", unLock);
+            }
         }
     }
     return 0;

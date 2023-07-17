@@ -6,7 +6,7 @@ C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(47,71): warning C4267: “参数”: 从
           ]
 C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(159,62): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
 C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(175,45): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
-C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(309,49): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(308,49): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
   正在生成代码
   Previous IPDB not found, fall back to full compilation.
   All 417 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.

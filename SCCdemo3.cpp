@@ -177,7 +177,6 @@ int LockSub() {
     wstring result = convertToHex(userInput.c_str());
 
     result = goToLocktwo(result.c_str(), passWordsub.c_str());
-    wcout << L"二次混淆的结果是：" << result << endl;
 
     wstringstream rtn;
     rtn << head << result;

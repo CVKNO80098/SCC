@@ -10,12 +10,88 @@
 #include <random>
 #include <fstream>
 #include <ctime>
+#include <chrono>//美化用件
+#include <thread>//美化用件
 
 using namespace std;
+
+//美化插件的初始化
+void simulateTyping(const std::wstring& text, int delayMillis = 100);
 
 wstringstream rtn;
 wstring unLock;
 int pr = 0;
+
+//加一些有趣的美观功能【？】
+void beginConsoloImg() {
+    srand(time(0));
+    int randInt = rand() % 5;
+    wstring printHead;
+    switch (randInt)
+    {
+    case 0:
+        printHead = LR"( ____    ____     ____      
+/\  _`\ /\  _`\  /\  _`\    
+\ \,\L\_\ \ \/\_\\ \ \/\_\  
+ \/_\__ \\ \ \/_/_\ \ \/_/_ 
+   /\ \L\ \ \ \L\ \\ \ \L\ \
+   \ `\____\ \____/ \ \____/
+    \/_____/\/___/   \/___/ 
+                            
+                            )";
+        break;
+    case 1:
+        printHead = LR"(    ___       ___       ___   
+   /\  \     /\  \     /\  \  
+  /::\  \   /::\  \   /::\  \ 
+ /\:\:\__\ /:/\:\__\ /:/\:\__\
+ \:\:\/__/ \:\ \/__/ \:\ \/__/
+  \::/  /   \:\__\    \:\__\  
+   \/__/     \/__/     \/__/  )";
+        break;
+    case 2:
+        printHead = LR"( (                  
+ )\ )   (      (    
+(()/(   )\     )\   
+ /(_))(((_)  (((_)  
+(_))  )\___  )\___  
+/ __|((/ __|((/ __| 
+\__ \ | (__  | (__  
+|___/  \___|  \___| 
+                    )";
+        break;
+    case 3:
+        printHead = LR"(  __________________ _________  
+ /   _____/\_   ___ \\_   ___ \ 
+ \_____  \ /    \  \//    \  \/ 
+ /        \\     \___\     \____
+/_______  / \______  /\______  /
+        \/         \/        \/ )";
+        break;
+    case 4:
+        printHead = LR"( ____ ____ ____ 
+||S |||C |||C ||
+||__|||__|||__||
+|/__\|/__\|/__\|)";
+        break;
+    default:
+        simulateTyping(L"很抱歉的告诉你，这个程序出了非常严重的问题，请等待我们修复");
+        Sleep(200);
+        simulateTyping(L"什么啊，原来是美化出错了，不管了不管了");
+        wcout << L"下次一定修好吧【请联系CVKNO80098@outlook.com】进行上报，您将会出现在鸣谢名单中";
+        break;
+    }
+    wcout << printHead << endl;
+}
+//宽字符逐个打字
+void simulateTyping(const std::wstring& text, int delayMillis) {
+    for (wchar_t c : text) {
+        std::wcout << c << std::flush;
+        std::this_thread::sleep_for(std::chrono::milliseconds(delayMillis));
+    }
+
+    std::wcout << std::endl; // 在函数结束后输出换行符
+}
 
 //获取当前时间
 wstring getCurrentTime() {
@@ -167,9 +243,18 @@ int LockSub() {
     wcout << L"请输入一个宽字符串：";
     wcin >> userInput;
 
+    //如果密码为空
+    if (userInput.empty()) {
+        wcout << L"您输入的字符为空，自动退出程序" << endl;
+    }
+
     wstring passWordsub;
     wcout << L"请输入密码（区分大小写）：";
     wcin >> passWordsub;
+
+    if (passWordsub.empty()) {
+        wcerr << L"喂喂喂，这程序不能没有密码吧，都加密了" << endl;
+    }
 
     wstring head;
     head = generateRandomString(hashPassword(passWordsub));
@@ -212,6 +297,7 @@ void createTempFile(const string& filePath, const wstring& content) {
     }
 }
 
+
 //EFI（可以不动了）
 int main(int argc, char* argv[]) {
     setlocale(LC_ALL, "");
@@ -221,6 +307,8 @@ int main(int argc, char* argv[]) {
 
     // 多了一行，但是我不敢动它
     std::locale::global(std::locale(""));
+
+    beginConsoloImg();
 
     string words;
     string password = "123";

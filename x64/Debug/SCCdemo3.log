@@ -1,10 +1,11 @@
 ﻿  SCCdemo3.cpp
-C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(46,71): warning C4267: “参数”: 从“size_t”转换到“_Ty”，可能丢失数据
+C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(27,15): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(123,71): warning C4267: “参数”: 从“size_t”转换到“_Ty”，可能丢失数据
           with
           [
               _Ty=int
           ]
-C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(161,62): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
-C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(178,45): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
-C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(298,49): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(235,62): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(260,45): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\qc275\Desktop\SCC\SCCdemo3.cpp(396,49): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
   SCCdemo3.vcxproj -> C:\Users\qc275\Desktop\SCC\x64\Debug\SCCdemo3.exe

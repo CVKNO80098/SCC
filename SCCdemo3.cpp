@@ -319,7 +319,7 @@ int main(int argc, char* argv[]) {
     if (argc == 1) {
         size_t choice1;
 
-        wcout << L"现在时间：" << getCurrentTime() << L"\n请选择模块：\n1：加密\n2：解密\n";
+        wcout << L"现在时间：" << getCurrentTime() << L"\n请选择模块：\n1：加密\n2：解密\n>>";
         wcin >> choice1;
         switch (choice1)
         {
@@ -341,7 +341,7 @@ int main(int argc, char* argv[]) {
         string arg = argv[1];
 
         if (arg == "--version") {
-            wcout << L"[" << getCurrentTime() << L"]   " << L"SCC 版本 1.2.6" << endl;
+            wcout << L"[" << getCurrentTime() << L"]   " << L"SCC - SecureCodeCrypter 版本 1.2.6" << endl;
             return 0;
         }
         else if (arg == "--help") {
